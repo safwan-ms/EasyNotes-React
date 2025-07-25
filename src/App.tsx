@@ -3,6 +3,7 @@ import "react-quill/dist/quill.snow.css";
 import { AiOutlinePlus } from "react-icons/ai";
 
 import { useNotesStore } from "./store";
+import Sidebar from "./components/Sidebar";
 
 const App = () => {
   const {
@@ -16,6 +17,7 @@ const App = () => {
   return (
     <div className="h-screen flex">
       {/* Sidebar */}
+      <Sidebar />
       {/* Main Area*/}
       <div className="w-2/3 p-8">
         {/* Text Editor (React Quill) */}
