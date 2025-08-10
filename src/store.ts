@@ -1,9 +1,13 @@
 import { create } from "zustand";
 
 interface Note {
+  id: string;
   text: string;
   color: string;
+  createdAt: Date;
+  updatedAt: Date;
 }
+
 interface NoteStore {
   notes: Note[];
   search: string;
@@ -17,9 +21,15 @@ interface NoteStore {
   setCurrentNoteIndex: (index: number | null) => void;
   addOrUpdateNote: () => void;
   selectNote: (index: number) => void;
+  deleteNote: (index: number) => void;
+  clearEditor: () => void;
 }
 
-export const useNotesStore = create<NoteStore>((set) => ({
+const generateId = () => {
+  return Date.now().toString(36) + Math.random().toString(36).substr(2);
+};
+
+export const useNotesStore = create<NoteStore>((set, get) => ({
   notes: [],
   search: "",
   editorContent: "",
@@ -31,17 +41,29 @@ export const useNotesStore = create<NoteStore>((set) => ({
   setEditorContent: (content) => set(() => ({ editorContent: content })),
   setNoteColor: (color) => set(() => ({ noteColor: color })),
   setCurrentNoteIndex: (index) => set(() => ({ currentNoteIndex: index })),
+  
+  clearEditor: () => set(() => ({ 
+    editorContent: "", 
+    noteColor: "#fff", 
+    currentNoteIndex: null 
+  })),
+
   addOrUpdateNote: () =>
     set((state) => {
       const { editorContent, noteColor, currentNoteIndex, notes } = state;
 
       if (editorContent.trim() === "") return {};
 
+      const now = new Date();
+
       if (currentNoteIndex !== null) {
+        // Update existing note
         const updatedNotes = [...notes];
         updatedNotes[currentNoteIndex] = {
+          ...updatedNotes[currentNoteIndex],
           text: editorContent,
           color: noteColor,
+          updatedAt: now,
         };
         return {
           notes: updatedNotes,
@@ -50,8 +72,16 @@ export const useNotesStore = create<NoteStore>((set) => ({
           currentNoteIndex: null,
         };
       } else {
+        // Create new note
+        const newNote: Note = {
+          id: generateId(),
+          text: editorContent,
+          color: noteColor,
+          createdAt: now,
+          updatedAt: now,
+        };
         return {
-          notes: [...notes, { text: editorContent, color: noteColor }],
+          notes: [...notes, newNote],
           editorContent: "",
           noteColor: "#fff",
           currentNoteIndex: null,
@@ -65,4 +95,21 @@ export const useNotesStore = create<NoteStore>((set) => ({
       editorContent: state.notes[index].text,
       noteColor: state.notes[index].color,
     })),
+
+  deleteNote: (index) =>
+    set((state) => {
+      const updatedNotes = state.notes.filter((_, i) => i !== index);
+      const newCurrentIndex = state.currentNoteIndex === index 
+        ? null 
+        : state.currentNoteIndex !== null && state.currentNoteIndex > index
+        ? state.currentNoteIndex - 1
+        : state.currentNoteIndex;
+      
+      return {
+        notes: updatedNotes,
+        currentNoteIndex: newCurrentIndex,
+        editorContent: newCurrentIndex !== null ? updatedNotes[newCurrentIndex]?.text || "" : "",
+        noteColor: newCurrentIndex !== null ? updatedNotes[newCurrentIndex]?.color || "#fff" : "#fff",
+      };
+    }),
 }));
