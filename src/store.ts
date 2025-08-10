@@ -29,7 +29,7 @@ const generateId = () => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
 };
 
-export const useNotesStore = create<NoteStore>((set, get) => ({
+export const useNotesStore = create<NoteStore>((set) => ({
   notes: [],
   search: "",
   editorContent: "",
@@ -41,12 +41,13 @@ export const useNotesStore = create<NoteStore>((set, get) => ({
   setEditorContent: (content) => set(() => ({ editorContent: content })),
   setNoteColor: (color) => set(() => ({ noteColor: color })),
   setCurrentNoteIndex: (index) => set(() => ({ currentNoteIndex: index })),
-  
-  clearEditor: () => set(() => ({ 
-    editorContent: "", 
-    noteColor: "#fff", 
-    currentNoteIndex: null 
-  })),
+
+  clearEditor: () =>
+    set(() => ({
+      editorContent: "",
+      noteColor: "#fff",
+      currentNoteIndex: null,
+    })),
 
   addOrUpdateNote: () =>
     set((state) => {
@@ -99,17 +100,24 @@ export const useNotesStore = create<NoteStore>((set, get) => ({
   deleteNote: (index) =>
     set((state) => {
       const updatedNotes = state.notes.filter((_, i) => i !== index);
-      const newCurrentIndex = state.currentNoteIndex === index 
-        ? null 
-        : state.currentNoteIndex !== null && state.currentNoteIndex > index
-        ? state.currentNoteIndex - 1
-        : state.currentNoteIndex;
-      
+      const newCurrentIndex =
+        state.currentNoteIndex === index
+          ? null
+          : state.currentNoteIndex !== null && state.currentNoteIndex > index
+          ? state.currentNoteIndex - 1
+          : state.currentNoteIndex;
+
       return {
         notes: updatedNotes,
         currentNoteIndex: newCurrentIndex,
-        editorContent: newCurrentIndex !== null ? updatedNotes[newCurrentIndex]?.text || "" : "",
-        noteColor: newCurrentIndex !== null ? updatedNotes[newCurrentIndex]?.color || "#fff" : "#fff",
+        editorContent:
+          newCurrentIndex !== null
+            ? updatedNotes[newCurrentIndex]?.text || ""
+            : "",
+        noteColor:
+          newCurrentIndex !== null
+            ? updatedNotes[newCurrentIndex]?.color || "#fff"
+            : "#fff",
       };
     }),
 }));

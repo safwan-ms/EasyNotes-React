@@ -1,17 +1,17 @@
-import { FiSearch, FiPlus, FiMenu, FiTrash2, FiEdit3 } from "react-icons/fi";
+import { FiSearch, FiPlus, FiMenu, FiTrash2 } from "react-icons/fi";
 import { useNotesStore } from "../store";
 
 const Sidebar = () => {
-  const { 
-    notes, 
-    search, 
-    selectNote, 
-    setSearch, 
-    setCurrentNoteIndex, 
-    setEditorContent, 
-    setNoteColor,
+  const {
+    notes,
+    search,
+    selectNote,
+    setSearch,
+    // setCurrentNoteIndex,
+    // setEditorContent,
+    // setNoteColor,
     deleteNote,
-    clearEditor
+    clearEditor,
   } = useNotesStore();
 
   const filteredNotes = notes.filter((note) =>
@@ -24,22 +24,26 @@ const Sidebar = () => {
 
   const getNotePreview = (htmlContent: string) => {
     // Remove HTML tags and get plain text for preview
-    const tempDiv = document.createElement('div');
+    const tempDiv = document.createElement("div");
     tempDiv.innerHTML = htmlContent;
-    const textContent = tempDiv.textContent || tempDiv.innerText || '';
-    return textContent.length > 80 ? textContent.substring(0, 80) + '...' : textContent;
+    const textContent = tempDiv.textContent || tempDiv.innerText || "";
+    return textContent.length > 80
+      ? textContent.substring(0, 80) + "..."
+      : textContent;
   };
 
   const formatDate = (date: Date) => {
     const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-    
+    const diffInHours = Math.floor(
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+    );
+
     if (diffInHours < 1) {
-      return 'Just now';
+      return "Just now";
     } else if (diffInHours < 24) {
       return `${diffInHours}h ago`;
     } else if (diffInHours < 48) {
-      return 'Yesterday';
+      return "Yesterday";
     } else {
       return date.toLocaleDateString();
     }
@@ -47,7 +51,7 @@ const Sidebar = () => {
 
   const handleDeleteNote = (e: React.MouseEvent, index: number) => {
     e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this note?')) {
+    if (window.confirm("Are you sure you want to delete this note?")) {
       deleteNote(index);
     }
   };
@@ -66,7 +70,7 @@ const Sidebar = () => {
             <FiPlus className="w-5 h-5" />
           </button>
         </div>
-        
+
         {/* Search Bar */}
         <div className="relative">
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
@@ -96,10 +100,11 @@ const Sidebar = () => {
                     className="w-3 h-3 rounded-full mt-1 flex-shrink-0"
                     style={{
                       backgroundColor: note.color,
-                      border: note.color === '#fff' ? '1px solid #e5e7eb' : 'none',
+                      border:
+                        note.color === "#fff" ? "1px solid #e5e7eb" : "none",
                     }}
                   />
-                  
+
                   {/* Note Content */}
                   <div className="flex-1 min-w-0">
                     <div className="text-sm text-gray-800 leading-relaxed mb-1">
