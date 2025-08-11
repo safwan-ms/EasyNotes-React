@@ -77,11 +77,12 @@ const Toolbar = ({
           onClick={() => {
             const selection = editor.state.selection;
             if (selection.empty) {
-              setIsBoldMode((prev) => !prev);
-              if (!isBoldMode && !editor.isActive("bold")) {
+              const next = !isBoldMode;
+              setIsBoldMode(next);
+              if (next && !editor.isActive("bold")) {
                 editor.chain().focus().setMark("bold").run();
               }
-              if (isBoldMode && editor.isActive("bold")) {
+              if (!next && editor.isActive("bold")) {
                 editor.chain().focus().unsetMark("bold").run();
               }
             } else {
@@ -97,16 +98,14 @@ const Toolbar = ({
             const selection = editor.state.selection;
             if (selection.empty) {
               // Toggle persistent italic mode and update UI immediately
-              setIsItalicMode((prev) => {
-                const next = !prev;
-                if (next && !editor.isActive("italic")) {
-                  editor.chain().focus().setMark("italic").run();
-                }
-                if (!next && editor.isActive("italic")) {
-                  editor.chain().focus().unsetMark("italic").run();
-                }
-                return next;
-              });
+              const next = !isItalicMode;
+              setIsItalicMode(next);
+              if (next && !editor.isActive("italic")) {
+                editor.chain().focus().setMark("italic").run();
+              }
+              if (!next && editor.isActive("italic")) {
+                editor.chain().focus().unsetMark("italic").run();
+              }
             } else {
               editor.chain().focus().toggleItalic().run();
             }
@@ -120,16 +119,14 @@ const Toolbar = ({
             const selection = editor.state.selection;
             if (selection.empty) {
               // Toggle persistent underline mode and update UI immediately
-              setIsUnderlineMode((prev) => {
-                const next = !prev;
-                if (next && !editor.isActive("underline")) {
-                  editor.chain().focus().setMark("underline").run();
-                }
-                if (!next && editor.isActive("underline")) {
-                  editor.chain().focus().unsetMark("underline").run();
-                }
-                return next;
-              });
+              const next = !isUnderlineMode;
+              setIsUnderlineMode(next);
+              if (next && !editor.isActive("underline")) {
+                editor.chain().focus().setMark("underline").run();
+              }
+              if (!next && editor.isActive("underline")) {
+                editor.chain().focus().unsetMark("underline").run();
+              }
             } else {
               editor.chain().focus().toggleUnderline().run();
             }
