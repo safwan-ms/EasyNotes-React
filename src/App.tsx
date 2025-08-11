@@ -1,11 +1,11 @@
-import { useEditor, EditorContent } from '@tiptap/react';
-import StarterKit from '@tiptap/starter-kit';
-import Placeholder from '@tiptap/extension-placeholder';
-import Underline from '@tiptap/extension-underline';
-import Link from '@tiptap/extension-link';
+import { useEditor, EditorContent } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Placeholder from "@tiptap/extension-placeholder";
+import Underline from "@tiptap/extension-underline";
+import Link from "@tiptap/extension-link";
 import { AiOutlinePlus } from "react-icons/ai";
-import { useEffect } from 'react';
-import './editor.css';
+import { useEffect, useState } from "react";
+import "./editor.css";
 
 import { useNotesStore } from "./store";
 import Sidebar from "./components/Sidebar";
@@ -22,17 +22,21 @@ const App = () => {
     clearEditor,
   } = useNotesStore();
 
+  const [isBoldMode, setIsBoldMode] = useState(false);
+  const [isItalicMode, setIsItalicMode] = useState(false);
+  const [isUnderlineMode, setIsUnderlineMode] = useState(false);
+
   const editor = useEditor({
     extensions: [
       StarterKit,
       Placeholder.configure({
-        placeholder: 'Write your note here...',
+        placeholder: "Write your note here...",
       }),
       Underline,
       Link.configure({
         openOnClick: false,
         HTMLAttributes: {
-          class: 'text-blue-600 underline cursor-pointer',
+          class: "text-blue-600 underline cursor-pointer",
         },
       }),
     ],
@@ -40,33 +44,47 @@ const App = () => {
     onUpdate: ({ editor }) => {
       setEditorContent(editor.getHTML());
     },
+    onTransaction: ({ transaction, editor }) => {
+      // If persistent mark modes are active and user types, ensure marks are set
+      if (transaction.docChanged && transaction.selection.empty) {
+        if (isBoldMode && !editor.isActive("bold")) {
+          editor.chain().focus().setMark("bold").run();
+        }
+        if (isItalicMode && !editor.isActive("italic")) {
+          editor.chain().focus().setMark("italic").run();
+        }
+        if (isUnderlineMode && !editor.isActive("underline")) {
+          editor.chain().focus().setMark("underline").run();
+        }
+      }
+    },
   });
 
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       // Cmd/Ctrl + S to save
-      if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+      if ((e.metaKey || e.ctrlKey) && e.key === "s") {
         e.preventDefault();
         addOrUpdateNote();
       }
-      
+
       // Cmd/Ctrl + N for new note
-      if ((e.metaKey || e.ctrlKey) && e.key === 'n') {
+      if ((e.metaKey || e.ctrlKey) && e.key === "n") {
         e.preventDefault();
         clearEditor();
         editor?.commands.focus();
       }
-      
+
       // Escape to clear selection
-      if (e.key === 'Escape' && currentNoteIndex !== null) {
+      if (e.key === "Escape" && currentNoteIndex !== null) {
         clearEditor();
         editor?.commands.focus();
       }
     };
 
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
+    document.addEventListener("keydown", handleKeyDown);
+    return () => document.removeEventListener("keydown", handleKeyDown);
   }, [addOrUpdateNote, clearEditor, editor, currentNoteIndex]);
 
   return (
@@ -75,16 +93,20 @@ const App = () => {
       <div className="hidden lg:block">
         <Sidebar />
       </div>
-      
+
       {/* Main Area */}
       <div className="flex-1 flex flex-col">
         {/* Header */}
         <div className="bg-white border-b border-gray-200 px-4 sm:px-6 py-4">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">EasyNotes</h1>
+              <h1 className="text-xl sm:text-2xl font-semibold text-gray-800">
+                EasyNotes
+              </h1>
               <p className="text-sm text-gray-500 mt-1">
-                {currentNoteIndex !== null ? "Editing note" : "Create a new note"}
+                {currentNoteIndex !== null
+                  ? "Editing note"
+                  : "Create a new note"}
               </p>
             </div>
             <div className="flex items-center space-x-2">
@@ -94,14 +116,24 @@ const App = () => {
                 <span>Esc Clear</span>
               </div>
               <button className="lg:hidden p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                <svg
+                  className="w-6 h-6"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 6h16M4 12h16M4 18h16"
+                  />
                 </svg>
               </button>
             </div>
           </div>
         </div>
-        
+
         {/* Editor Container */}
         <div className="flex-1 p-4 sm:p-6">
           <div className="max-w-4xl mx-auto">
@@ -109,13 +141,21 @@ const App = () => {
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
               {/* Toolbar */}
               <div className="overflow-x-auto">
-                <Toolbar editor={editor} />
+                <Toolbar
+                  editor={editor}
+                  isBoldMode={isBoldMode}
+                  setIsBoldMode={setIsBoldMode}
+                  isItalicMode={isItalicMode}
+                  setIsItalicMode={setIsItalicMode}
+                  isUnderlineMode={isUnderlineMode}
+                  setIsUnderlineMode={setIsUnderlineMode}
+                />
               </div>
-              
+
               {/* Editor Content */}
               <div className="min-h-[300px] sm:min-h-[400px] p-4 sm:p-6">
-                <EditorContent 
-                  editor={editor} 
+                <EditorContent
+                  editor={editor}
                   className="h-full focus:outline-none prose prose-sm max-w-none"
                 />
               </div>
@@ -126,7 +166,7 @@ const App = () => {
               {/* Color Selector */}
               <div className="flex items-center space-x-3">
                 <div className="flex items-center space-x-2">
-                  <div 
+                  <div
                     className="w-6 h-6 rounded-full border-2 border-gray-300 shadow-sm"
                     style={{ backgroundColor: noteColor }}
                   />
@@ -156,7 +196,9 @@ const App = () => {
                   onClick={addOrUpdateNote}
                 >
                   <AiOutlinePlus className="w-4 h-4" />
-                  <span>{currentNoteIndex !== null ? "Update Note" : "Save Note"}</span>
+                  <span>
+                    {currentNoteIndex !== null ? "Update Note" : "Save Note"}
+                  </span>
                 </button>
               </div>
             </div>
